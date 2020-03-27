@@ -11,9 +11,13 @@ function showError(input, msg) {
   smallTag.innerText = msg;
 }
 
-function isValid(email) {
+function checkEmail(email) {
   const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  return re.test(String(email).toLowerCase());
+  if (re.test(email.value)) {
+    showSuccess(email);
+  } else {
+    showError(email, "Email is invalid");
+  }
 }
 
 function showSuccess(input) {
@@ -21,26 +25,47 @@ function showSuccess(input) {
   formControl.className = "form-control success";
 }
 
+function checkValidation(inputArr) {
+  inputArr.forEach(function(elem) {
+    if (elem.value.trim() === "") {
+      showError(elem, `${getFieldName(elem)} is required`);
+    } else {
+      showSuccess(elem);
+    }
+  });
+}
+
+function getFieldName(input) {
+  return input.id.charAt(0).toUpperCase() + input.id.slice(1);
+}
+
+function checkLength(element, min, max) {
+  if (element.value.length < min) {
+    showError(
+      element,
+      `${getFieldName(element)} length must be at least ${min} characters`
+    );
+  } else if (element.value.length > max) {
+    showError(
+      element,
+      `${getFieldName(element)} length must be less then ${max} characters`
+    );
+  } else {
+    showSuccess(element);
+  }
+}
+
+function checkPasswordsMatch(pass1, pass2) {
+  if (pass1 !== pass2) {
+    showError(pass2, "Passwords don't match");
+  }
+}
+
 form.addEventListener("submit", function(e) {
   e.preventDefault();
-
-  username.value === ""
-    ? showError(username, "Username is required")
-    : showSuccess(username);
-
-  if (email.value === "") {
-    showError(email, "Email is required");
-  } else if (!isValid(email.value)) {
-    showError(email, "Email is not valid");
-  } else {
-    showSuccess(email);
-  }
-
-  password.value === ""
-    ? showError(password, "Password is required")
-    : showSuccess(password);
-
-  password2.value === ""
-    ? showError(password2, "Password confirmation is required")
-    : showSuccess(password2);
+  checkValidation([username, email, password, password2]);
+  checkLength(username, 3, 15);
+  checkLength(password, 6, 20);
+  checkEmail(email);
+  checkPasswordsMatch(password, password2);
 });
